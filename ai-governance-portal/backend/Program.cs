@@ -19,7 +19,7 @@ builder.Services.AddDbContext<GovernanceDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Swagger 
+// Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Apply any pending migrations & create database
+// Automatically apply migrations & create the SQLite database
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GovernanceDbContext>();
@@ -45,27 +45,26 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
-        {
+    {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Governance API v1");
-        });
-
+    });
 }
 
-// Minimal API routes
+// Minimal CRUD endpoints
 
-// GET all entries
+// GET all entries (admin)
 app.MapGet("/api/usage", async (GovernanceDbContext db) =>
     await db.UsageEntries.ToListAsync()
 );
 
-// GET by user
+// GET entries by user
 app.MapGet("/api/usage/user/{username}", async (GovernanceDbContext db, string username) =>
     await db.UsageEntries
             .Where(e => e.Username == username)
             .ToListAsync()
 );
 
-// POST new entry
+// POST a new entry
 app.MapPost("/api/usage", async (GovernanceDbContext db, UsageEntry entry) =>
 {
     db.UsageEntries.Add(entry);
