@@ -13,7 +13,9 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | undefined;
-  const from = state?.from?.pathname ?? (role === 'admin' ? '/dashboard' : '/submit');
+  const from = role === 'admin'
+    ? '/dashboard'
+    : state?.from?.pathname ?? '/submit';
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
