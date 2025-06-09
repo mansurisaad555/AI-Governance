@@ -9,6 +9,7 @@ import {
   Alert,
   Form
 } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { useUser } from '../context/UserContext';
 
@@ -26,49 +27,53 @@ interface Entry {
 
 const Dashboard: React.FC = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // fetch list on mount / role change
   useEffect(() => {
     if (!user) return;
-
     const url =
       user.role === 'admin'
         ? '/api/usage'
         : `/api/usage/user/${encodeURIComponent(user.name)}`;
 
-    axios
-      .get<Entry[]>(url)
+    axios.get<Entry[]>(url)
       .then(res => setEntries(res.data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [user]);
 
+  // toggle between Pending/Approved
   const toggleStatus = (id: number) => {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
-
-    // flip between Pending and Approved
     const newStatus = entry.status === 'Approved' ? 'Pending' : 'Approved';
-
-    axios
-      .put<Entry>(`/api/usage/${id}`, { ...entry, status: newStatus })
+    axios.put<Entry>(`/api/usage/${id}`, { ...entry, status: newStatus })
       .then(res => {
-        setEntries(entries.map(e => (e.id === id ? res.data : e)));
+        setEntries(entries.map(e => e.id === id ? res.data : e));
+      })
+      .catch(err => setError(err.message));
+  };
+
+  // delete entry
+  const deleteEntry = (id: number) => {
+    axios.delete(`/api/usage/${id}`)
+      .then(() => {
+        setEntries(entries.filter(e => e.id !== id));
       })
       .catch(err => setError(err.message));
   };
 
   if (loading) return <Spinner animation="border" />;
-  if (error) return <Alert variant="danger">{error}</Alert>;
+  if (error)   return <Alert variant="danger">{error}</Alert>;
 
   return (
     <Container className="py-4">
       <h2>
-        {user?.role === 'admin'
-          ? 'Admin Dashboard'
-          : 'Your Submissions'}
+        {user?.role === 'admin' ? 'Admin Dashboard' : 'Your Submissions'}
       </h2>
 
       <Table striped bordered hover responsive>
@@ -82,7 +87,7 @@ const Dashboard: React.FC = () => {
             <th>Frequency</th>
             {user?.role === 'admin' && <th>Risk</th>}
             <th>Status</th>
-            {user?.role === 'admin' && <th>Actions</th>}
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -101,17 +106,14 @@ const Dashboard: React.FC = () => {
                     size="sm"
                     value={e.riskLevel}
                     onChange={ev =>
-                      axios
-                        .put<Entry>(`/api/usage/${e.id}`, {
-                          ...e,
-                          riskLevel: ev.target.value
-                        })
-                        .then(res =>
-                          setEntries(entries.map(x =>
-                            x.id === e.id ? res.data : x
-                          ))
-                        )
-                        .catch(err => setError(err.message))
+                      axios.put<Entry>(`/api/usage/${e.id}`, {
+                        ...e,
+                        riskLevel: ev.target.value
+                      })
+                      .then(res => setEntries(
+                        entries.map(x => x.id === e.id ? res.data : x)
+                      ))
+                      .catch(err => setError(err.message))
                     }
                   >
                     <option>Low</option>
@@ -127,17 +129,38 @@ const Dashboard: React.FC = () => {
                 </Badge>
               </td>
 
-              {user?.role === 'admin' && (
-                <td>
+              <td>
+                {/* Edit */}
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  className="me-2"
+                  onClick={() => navigate(`/edit/${e.id}`)}
+                >
+                  Edit
+                </Button>
+
+                {/* Approve/Unapprove */}
+                {user?.role === 'admin' && (
                   <Button
                     size="sm"
-                    variant={e.status === 'Approved' ? 'secondary' : 'primary'}
+                    variant={e.status === 'Approved' ? 'secondary' : 'success'}
+                    className="me-2"
                     onClick={() => toggleStatus(e.id)}
                   >
                     {e.status === 'Approved' ? 'Unapprove' : 'Approve'}
                   </Button>
-                </td>
-              )}
+                )}
+
+                {/* Delete */}
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => deleteEntry(e.id)}
+                >
+                  Delete
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>

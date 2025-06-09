@@ -11,8 +11,37 @@ const App: React.FC = () => (
     <HomeNav />
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/submit" element={<RequireAuth><UsageForm/></RequireAuth>} />
-      <Route path="/dashboard" element={<RequireAuth><Dashboard/></RequireAuth>} />
+
+      {/* submit new */}
+      <Route
+        path="/submit"
+        element={
+          <RequireAuth>
+            <UsageForm />
+          </RequireAuth>
+        }
+      />
+
+      {/* edit existing */}
+      <Route
+        path="/edit/:id"
+        element={
+          <RequireAuth>
+            <UsageForm />
+          </RequireAuth>
+        }
+      />
+
+      {/* dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <RequireAuth>
+            <Dashboard />
+          </RequireAuth>
+        }
+      />
+
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

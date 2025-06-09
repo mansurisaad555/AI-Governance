@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Automatically apply migrations & create the SQLite database
+// Auto-migrate / create DB
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GovernanceDbContext>();
@@ -40,7 +40,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors();
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -50,21 +49,24 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Minimal CRUD endpoints
-
-// GET all entries (admin)
+// GET all entries
 app.MapGet("/api/usage", async (GovernanceDbContext db) =>
     await db.UsageEntries.ToListAsync()
 );
 
-// GET entries by user
+// GET by user
 app.MapGet("/api/usage/user/{username}", async (GovernanceDbContext db, string username) =>
-    await db.UsageEntries
-            .Where(e => e.Username == username)
-            .ToListAsync()
+    await db.UsageEntries.Where(e => e.Username == username).ToListAsync()
 );
 
-// POST a new entry
+//GET single entry by id
+app.MapGet("/api/usage/{id:int}", async (GovernanceDbContext db, int id) =>
+{
+    var entry = await db.UsageEntries.FindAsync(id);
+    return entry is not null ? Results.Ok(entry) : Results.NotFound();
+});
+
+// POST new entry
 app.MapPost("/api/usage", async (GovernanceDbContext db, UsageEntry entry) =>
 {
     db.UsageEntries.Add(entry);

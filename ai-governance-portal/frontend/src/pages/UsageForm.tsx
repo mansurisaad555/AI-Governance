@@ -16,6 +16,7 @@ const UsageForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
     try {
       await axios.post('/api/usage', {
         username: user.name,
@@ -23,12 +24,17 @@ const UsageForm: React.FC = () => {
         dataType,
         purpose,
         frequency,
-        riskLevel: '',      
-        status: 'Pending', 
+        riskLevel: '',      // admin sets later
+        status: 'Pending',  // initial state
       });
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Submission failed');
+      // narrow `unknown` to Error
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Submission failed');
+      }
     }
   };
 
