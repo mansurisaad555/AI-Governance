@@ -23,7 +23,7 @@ const HomeNav: React.FC = () => {
             {user?.role === 'employee' && (
               <Nav.Link as={Link} to="/submit">Submit Usage</Nav.Link>
             )}
-            {user?.role === 'admin' && (
+            {user && (
               <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
             )}
           </Nav>

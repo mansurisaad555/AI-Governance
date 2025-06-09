@@ -23,9 +23,10 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!user) return;
-    const url = user.role === 'admin'
-      ? '/api/usage'
-      : `/api/usage/user/${encodeURIComponent(user.name)}`;
+    const url =
+      user.role === 'admin'
+        ? '/api/usage'
+        : `/api/usage/user/${encodeURIComponent(user.name)}`;
 
     axios.get<Entry[]>(url)
       .then(res => setEntries(res.data))
@@ -33,12 +34,12 @@ const Dashboard: React.FC = () => {
       .finally(() => setLoading(false));
   }, [user]);
 
-  const updateRisk = (id: number, newLevel: string) => {
+  const updateStatus = (id: number) => {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
-    axios.put(`/api/usage/${id}`, { ...entry, riskLevel: newLevel })
+    axios.put(`/api/usage/${id}`, { ...entry, status: 'Approved' })
       .then(res => {
-        setEntries(entries.map(e => e.id === id ? res.data : e));
+        setEntries(entries.map(e => (e.id === id ? res.data : e)));
       })
       .catch(err => setError(err.message));
   };
@@ -58,9 +59,9 @@ const Dashboard: React.FC = () => {
             <th>Data Type</th>
             <th>Purpose</th>
             <th>Usage/Week</th>
-            {user?.role==='admin' && <th>Risk</th>}
+            {user?.role === 'admin' && <th>Risk</th>}
             <th>Status</th>
-            {user?.role==='admin' && <th>Actions</th>}
+            {user?.role === 'admin' && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -72,12 +73,17 @@ const Dashboard: React.FC = () => {
               <td>{e.dataType}</td>
               <td>{e.purpose}</td>
               <td>{e.frequency}</td>
-              {user?.role==='admin' && (
+              {user?.role === 'admin' && (
                 <td>
                   <Form.Select
                     size="sm"
                     value={e.riskLevel}
-                    onChange={ev => updateRisk(e.id, ev.target.value)}
+                    onChange={ev =>
+                      axios.put(`/api/usage/${e.id}`, { ...e, riskLevel: ev.target.value })
+                        .then(res => setEntries(
+                          entries.map(x => x.id === e.id ? res.data : x)
+                        ))
+                    }
                   >
                     <option>Low</option>
                     <option>Medium</option>
@@ -85,9 +91,21 @@ const Dashboard: React.FC = () => {
                   </Form.Select>
                 </td>
               )}
-              <td><Badge bg="info">{e.status}</Badge></td>
-              {user?.role==='admin' && (
-                <td><Button size="sm" disabled>Approve</Button></td>
+              <td>
+                <Badge bg={e.status === 'Approved' ? 'success' : 'warning'}>
+                  {e.status}
+                </Badge>
+              </td>
+              {user?.role === 'admin' && (
+                <td>
+                  <Button
+                    size="sm"
+                    onClick={() => updateStatus(e.id)}
+                    disabled={e.status === 'Approved'}
+                  >
+                    Approve
+                  </Button>
+                </td>
               )}
             </tr>
           ))}

@@ -23,8 +23,8 @@ const UsageForm: React.FC = () => {
         dataType,
         purpose,
         frequency,
-        riskLevel: '', // admin will set later
-        status: 'New'
+        riskLevel: '',      
+        status: 'Pending', 
       });
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -41,11 +41,19 @@ const UsageForm: React.FC = () => {
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Tool Name</Form.Label>
-              <Form.Control value={tool} onChange={e => setTool(e.target.value)} required/>
+              <Form.Control
+                value={tool}
+                onChange={e => setTool(e.target.value)}
+                required
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Data Type</Form.Label>
-              <Form.Select value={dataType} onChange={e => setDataType(e.target.value)} required>
+              <Form.Select
+                value={dataType}
+                onChange={e => setDataType(e.target.value)}
+                required
+              >
                 <option value="">Select…</option>
                 <option>Public</option>
                 <option>Internal-only</option>
@@ -55,11 +63,23 @@ const UsageForm: React.FC = () => {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Purpose</Form.Label>
-              <Form.Control as="textarea" rows={2} value={purpose} onChange={e => setPurpose(e.target.value)} required/>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                value={purpose}
+                onChange={e => setPurpose(e.target.value)}
+                required
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Frequency (per week)</Form.Label>
-              <Form.Control type="number" min={1} value={frequency} onChange={e => setFrequency(+e.target.value)} required/>
+              <Form.Control
+                type="number"
+                min={1}
+                value={frequency}
+                onChange={e => setFrequency(+e.target.value)}
+                required
+              />
             </Form.Group>
             <Button type="submit">Submit</Button>
           </Form>
