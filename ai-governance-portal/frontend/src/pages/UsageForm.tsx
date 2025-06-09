@@ -20,7 +20,7 @@ interface UsageEntry {
 const UsageForm: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();          // read :id
+  const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
 
   // form state
@@ -60,7 +60,7 @@ const UsageForm: React.FC = () => {
       dataType,
       purpose,
       frequency,
-      riskLevel: '',                 // admin sets later
+      riskLevel: '',
       status: isEdit ? undefined : 'Pending'
     };
 

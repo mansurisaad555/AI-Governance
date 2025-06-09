@@ -6,7 +6,7 @@ const RequireAuth: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { user } = useUser();
   const location = useLocation();
   if (!user) {
-    // not logged in → redirect to login
+    // redirect to login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   return children;
