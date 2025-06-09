@@ -3,22 +3,20 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Form, Button, Container, Card } from 'react-bootstrap';
 import { useUser, type Role } from '../context/UserContext';
 
+interface LocationState { from?: { pathname: string } }
+
 const Login: React.FC = () => {
   const { setUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>('employee');
   const navigate = useNavigate();
-  // define the shape of location.state
-  interface LocationState { from?: { pathname: string } }
   const location = useLocation();
-   const state = location.state as LocationState | undefined;
-   const from = state?.from?.pathname 
-     ?? (role === 'admin' ? '/dashboard' : '/submit');
+  const state = location.state as LocationState | undefined;
+  const from = state?.from?.pathname ?? (role === 'admin' ? '/dashboard' : '/submit');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    // TODO: replace with real auth
     if (!email || !password) return;
     setUser({ name: email.split('@')[0], email, role });
     navigate(from, { replace: true });
@@ -32,11 +30,11 @@ const Login: React.FC = () => {
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} required/>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+              <Form.Control type="password" value={password} onChange={e => setPassword(e.target.value)} required/>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Role</Form.Label>

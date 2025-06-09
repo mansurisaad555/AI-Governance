@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+// src/context/UserContext.tsx
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode
+} from 'react';
 
 export type Role = 'employee' | 'admin';
 
@@ -16,7 +23,21 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // 1) Initialize from localStorage if present
+  const [user, setUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  // 2) Whenever `user` changes, mirror it to localStorage
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
+
   return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 };
 

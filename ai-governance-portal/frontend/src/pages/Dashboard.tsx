@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Badge, Button, Spinner, Alert, Form } from 'react-bootstrap';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useUser } from '../context/UserContext';
-
-const BACKEND = 'http://localhost:5056';
 
 interface Entry {
   id: number;
@@ -26,18 +24,19 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     const url = user.role === 'admin'
-      ? `${BACKEND}/api/usage`
-      : `${BACKEND}/api/usage/user/${encodeURIComponent(user.name)}`;
+      ? '/api/usage'
+      : `/api/usage/user/${encodeURIComponent(user.name)}`;
+
     axios.get<Entry[]>(url)
       .then(res => setEntries(res.data))
       .catch(err => setError(err.message))
-      .finally(()=>setLoading(false));
+      .finally(() => setLoading(false));
   }, [user]);
 
   const updateRisk = (id: number, newLevel: string) => {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
-    axios.put(`${BACKEND}/api/usage/${id}`, { ...entry, riskLevel: newLevel })
+    axios.put(`/api/usage/${id}`, { ...entry, riskLevel: newLevel })
       .then(res => {
         setEntries(entries.map(e => e.id === id ? res.data : e));
       })
@@ -58,7 +57,7 @@ const Dashboard: React.FC = () => {
             <th>Tool</th>
             <th>Data Type</th>
             <th>Purpose</th>
-            <th>Freq</th>
+            <th>Usage/Week</th>
             {user?.role==='admin' && <th>Risk</th>}
             <th>Status</th>
             {user?.role==='admin' && <th>Actions</th>}
@@ -88,10 +87,7 @@ const Dashboard: React.FC = () => {
               )}
               <td><Badge bg="info">{e.status}</Badge></td>
               {user?.role==='admin' && (
-                <td>
-                  {/* Future: approve / flag buttons */}
-                  <Button size="sm">Approve</Button>
-                </td>
+                <td><Button size="sm" disabled>Approve</Button></td>
               )}
             </tr>
           ))}
