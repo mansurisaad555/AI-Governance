@@ -1,44 +1,132 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/qbAOVmAh)
-[![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=19418491)
-# webdev_FinalProject
+# 🧠 AI Governance Portal
 
-# Fill this out first
-https://forms.office.com/r/2zyNMxJHd3
+> **Track, manage, and govern AI tool usage in your organization.**
 
-## Requirements
-Choose a project that fulfills the following requirements:
+---
 
-	1. Front end must be a react application
- 		a. We have not put a lot of time into CSS and Styling this quarter.  I do not expect your project to look perfect but I do expect effort to be put into the design.  Leverage Bootstrap as heavily as you can.
-	2. Back end must be a dotnet mininimal api web application
-		a. Must include GET, POST, PUT and DELETE api calls
-	3. Must have data persistence to a database.  This can be a SQL lite database, MS SQL, MySQL, Mongo, etc.  You can use multiple databases if you'd like. 
-	4. The Entity Framework must handle all communication between the dotnet application and the database
-	5. Your application must have a login page with support of Oauth2.0 Authentication and handle multiple users.
-		a. It should have a workflow for creating a new account
-		b. Authenticating against that new account
-		c. Being able to login with that new account
-	6. Must have multiple pages and/or views
- 		a. It must store state and context.  This can be implemented as user preferences or something like a shopping cart
-	7. Project demo will be a video and submitted via D2L
-		a. Submission will require a document or PowerPoint presentation describing your project
-			i. Describe each of the above requirements and how your project meets them
-			ii. Why did you choose this specific project
-			iii. If you had more time, what would you do differently
-		b. Project source code must be committed to GitHub.  If you submit a presentation but do not commit source code then you will receive a 0%.  
+## 🚀 Overview
 
+The **AI Governance Portal** is a full-stack web application designed to help organizations monitor and control the use of AI tools by employees. With secure authentication, role-based access, and a modern UI, this project demonstrates best practices in both frontend and backend development.
 
-## Example projects:
-	• Blogging Platform
- 	• Social Application
-	• Bank / ATM application
-	• Personalized Weather Application
-	• Chat application
-	• Gradebook supporting multiple students
-	• Reservation system (restaurants, equipment, cars, etc.)
-	• Shopping application (limit the scope)
-	• Finance app (Display stocks, Crypto etc.)
-	• Crime alert by location/user
-	• Book Review site
-	• Resale of used items (aka Craigslist )
- 
+---
+
+## 🌟 Features
+
+- **User Authentication & Authorization**  
+  Secure registration and login with JWT-based authentication. Supports employee and admin roles.
+
+- **Role-Based Access Control**  
+  Admins can view and manage all AI usage entries; employees can only see and edit their own.
+
+- **AI Usage Tracking**  
+  Employees can log their use of AI tools, including purpose, data type, and risk level.
+
+- **Responsive UI**  
+  Built with React and Bootstrap for a seamless experience on any device.
+
+- **RESTful API**  
+  .NET Minimal API backend with full CRUD support and protected endpoints.
+
+- **Persistent Data**  
+  All data is stored in a SQLite database via Entity Framework Core.
+
+---
+
+## 🛠️ Tech Stack
+
+| Frontend         | Backend         | Database | Auth         | Styling   |
+|------------------|----------------|----------|--------------|-----------|
+| React (Vite)     | .NET 8 Minimal API | SQLite   | JWT (OAuth2.0) | Bootstrap |
+
+---
+
+## 📸 Screenshots
+
+![Login Page](./screenshots/login.png)
+![Dashboard](./screenshots/dashboard.png)
+![Usage Form](./screenshots/usage-form.png)
+
+---
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Node.js & npm](https://nodejs.org/)
+- [Vite](https://vitejs.dev/)
+
+### Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/ai-governance-portal.git
+   cd ai-governance-portal
+   ```
+
+2. **Backend**
+   ```bash
+   cd backend
+   dotnet ef database update   # Apply migrations
+   dotnet run
+   ```
+
+3. **Frontend**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+4. **Visit**  
+   Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 🔒 Authentication
+
+- **Register** as a new user (employee by default).
+- **Login** to access the portal.
+- **Admins** can manage all entries; employees see only their own.
+
+---
+
+## 📂 Project Structure
+
+```
+/backend   # .NET Minimal API, Entity Framework, SQLite
+/frontend  # React, Vite, Bootstrap, JWT Auth
+```
+
+---
+
+## 💡 Why This Project?
+
+AI is transforming workplaces, but governance is critical. This portal provides a practical solution for organizations to ensure responsible AI usage, while showcasing my skills in secure, scalable, and modern web development.
+
+---
+
+## 🚀 Future Improvements
+
+- Email verification & password reset
+- Audit logs & advanced analytics
+- Cloud deployment (Azure/AWS)
+- Automated testing (unit & integration)
+
+---
+
+## 👋 About Me
+
+I'm passionate about building impactful software with modern technologies.  
+**Let’s connect!**  
+[LinkedIn](https://www.linkedin.com/in/mansurisaad555)
+
+---
+
+## 📜 License
+
+MIT
+
+---
+
+> _Built with ❤️ by Saad Mansuri
