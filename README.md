@@ -12,19 +12,31 @@ The **AI Governance Portal** is a full-stack web application designed to help or
 
 ## 🌟 Features
 
-- **User Authentication & Authorization**  
+- **User Authentication & Authorization**
   Secure registration and login with JWT-based authentication. Supports employee and admin roles.
 
-- **Role-Based Access Control**  
+- **Role-Based Access Control**
   Admins can view and manage all AI usage entries; employees can only see and edit their own.
 
-- **AI Usage Tracking**  
+- **AI Usage Tracking**
   Employees can log their use of AI tools, including purpose, data type, and risk level.
 
-- **Responsive UI**  
+- **ML-powered Risk Scoring**
+  A lightweight Hugging Face classifier (tiny DistilBERT) generates advisory risk ratings with explainability and confidence scores.
+
+- **Adversarial Prompt Shielding**
+  Incoming submissions are scanned for prompt-injection patterns and flagged for manual escalation.
+
+- **Automated Regulatory Mapping**
+  The AI-derived risk profile is tied to GDPR/HIPAA/PCI checklists and auto-denies severe violations.
+
+- **Model Cards & Audit Trail**
+  Every approved request snapshots its decision context into a model card for downstream governance reviews.
+
+- **Responsive UI**
   Built with React and Bootstrap for a seamless experience on any device.
 
-- **RESTful API**  
+- **RESTful API**
   .NET Minimal API backend with full CRUD support and protected endpoints.
 
 - **Persistent Data**  
@@ -54,6 +66,8 @@ The **AI Governance Portal** is a full-stack web application designed to help or
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
 - [Node.js & npm](https://nodejs.org/)
+- [Python 3.11](https://www.python.org/) (for the local ML risk microservice)
+- [pip](https://pip.pypa.io/) and [virtualenv](https://virtualenv.pypa.io/) recommended
 - [Vite](https://vitejs.dev/)
 
 ### Setup
@@ -64,22 +78,44 @@ The **AI Governance Portal** is a full-stack web application designed to help or
    cd ai-governance-portal
    ```
 
-2. **Backend**
+2. **Risk Scoring Microservice**
+   ```bash
+   cd ml-service
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   uvicorn app:app --reload --port 8000
+   ```
+
+3. **Backend**
    ```bash
    cd backend
    dotnet ef database update   # Apply migrations
    dotnet run
    ```
 
-3. **Frontend**
+4. **Frontend**
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
 
-4. **Visit**  
+5. **Visit**
    Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+> ℹ️ The backend expects the ML service at `http://localhost:8000`; override with `RiskAssessment__BaseUrl` if needed.
+
+---
+
+## 🐳 Run Everything with Docker Compose
+
+1. Build and start all services (frontend, backend, ML) in one step:
+   ```bash
+   docker compose up --build
+   ```
+2. Visit the frontend on [http://localhost:5173](http://localhost:5173). The backend listens on port `5056`, and the ML API on `8000`.
+3. Stop the stack with `Ctrl+C` and `docker compose down` when finished.
 
 ---
 

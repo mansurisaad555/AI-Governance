@@ -7,11 +7,26 @@ import {
   Button,
   Spinner,
   Alert,
-  Form
+  Form,
+  OverlayTrigger,
+  Tooltip,
+  ButtonGroup
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { useUser } from '../context/UserContext';
+import ModelCardModal, { type ModelCard } from '../components/ModelCardModal';
+
+const buildUpdatePayload = (entry: Entry) => ({
+  username: entry.username,
+  toolName: entry.toolName,
+  dataType: entry.dataType,
+  purpose: entry.purpose,
+  frequency: entry.frequency,
+  riskLevel: entry.riskLevel,
+  status: entry.status,
+  denialReason: entry.denialReason,
+});
 
 interface Entry {
   id: number;
@@ -23,6 +38,18 @@ interface Entry {
   riskLevel: string;
   status: string;
   createdAt: string;
+  aiRiskLevel: string;
+  aiConfidence?: number;
+  aiRecommendation?: string;
+  aiRationale?: string;
+  complianceChecklist: string;
+  policyAlerts?: string;
+  adversarialFlag: boolean;
+  adversarialIndicators?: string;
+  majorViolations?: string;
+  denialReason?: string;
+  autoDecisionSource?: string;
+  modelCard?: ModelCard | null;
 }
 
 const Dashboard: React.FC = () => {
@@ -31,6 +58,8 @@ const Dashboard: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedCard, setSelectedCard] = useState<ModelCard | null>(null);
+  const [showCardModal, setShowCardModal] = useState(false);
 
   // fetch list on mount / role change
   useEffect(() => {
@@ -51,7 +80,8 @@ const Dashboard: React.FC = () => {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
     const newStatus = entry.status === 'Approved' ? 'Pending' : 'Approved';
-    axios.put<Entry>(`/api/usage/${id}`, { ...entry, status: newStatus })
+    const payload = buildUpdatePayload({ ...entry, status: newStatus });
+    axios.put<Entry>(`/api/usage/${id}`, payload)
       .then(res => {
         setEntries(entries.map(e => e.id === id ? res.data : e));
       })
@@ -85,8 +115,10 @@ const Dashboard: React.FC = () => {
             <th>Data Type</th>
             <th>Purpose</th>
             <th>Frequency</th>
-            {user?.role === 'admin' && <th>Risk</th>}
+            <th>AI Risk</th>
             <th>Status</th>
+            <th>Compliance</th>
+            <th>Security</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -100,71 +132,129 @@ const Dashboard: React.FC = () => {
               <td>{e.purpose}</td>
               <td>{e.frequency}</td>
 
-              {user?.role === 'admin' && (
-                <td>
-                  <Form.Select
-                    size="sm"
-                    value={e.riskLevel}
-                    onChange={ev =>
-                      axios.put<Entry>(`/api/usage/${e.id}`, {
-                        ...e,
-                        riskLevel: ev.target.value
-                      })
-                      .then(res => setEntries(
-                        entries.map(x => x.id === e.id ? res.data : x)
-                      ))
-                      .catch(err => setError(err.message))
-                    }
-                  >
-                    <option>Low</option>
-                    <option>Medium</option>
-                    <option>High</option>
-                  </Form.Select>
-                </td>
-              )}
-
               <td>
-                <Badge bg={e.status === 'Approved' ? 'success' : 'warning'}>
-                  {e.status}
-                </Badge>
+                <div className="d-flex flex-column gap-1">
+                  <Badge bg={e.aiRiskLevel === 'High' ? 'danger' : e.aiRiskLevel === 'Medium' ? 'warning' : 'success'}>
+                    {e.aiRiskLevel}
+                  </Badge>
+                  {user?.role === 'admin' ? (
+                    <Form.Select
+                      size="sm"
+                      value={e.riskLevel}
+                      onChange={ev => {
+                        const updatedEntry = { ...e, riskLevel: ev.target.value };
+                        const payload = buildUpdatePayload(updatedEntry);
+                        axios.put<Entry>(`/api/usage/${e.id}`, payload)
+                          .then(res => setEntries(
+                            entries.map(x => x.id === e.id ? res.data : x)
+                          ))
+                          .catch(err => setError(err.message));
+                      }}
+                    >
+                      <option>Low</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                    </Form.Select>
+                  ) : (
+                    <span className="text-muted">Final: {e.riskLevel}</span>
+                  )}
+                  {typeof e.aiConfidence === 'number' && (
+                    <small className="text-muted">Conf {(e.aiConfidence * 100).toFixed(1)}%</small>
+                  )}
+                </div>
               </td>
 
               <td>
-                {/* Edit */}
-                <Button
-                  size="sm"
-                  variant="outline-primary"
-                  className="me-2"
-                  onClick={() => navigate(`/edit/${e.id}`)}
-                >
-                  Edit
-                </Button>
-
-                {/* Approve/Unapprove */}
-                {user?.role === 'admin' && (
-                  <Button
-                    size="sm"
-                    variant={e.status === 'Approved' ? 'secondary' : 'success'}
-                    className="me-2"
-                    onClick={() => toggleStatus(e.id)}
-                  >
-                    {e.status === 'Approved' ? 'Unapprove' : 'Approve'}
-                  </Button>
+                <Badge bg={e.status === 'Approved' ? 'success' : e.status === 'Denied' ? 'danger' : 'warning'}>
+                  {e.status}
+                </Badge>
+                {e.denialReason && (
+                  <div className="text-danger small mt-1">{e.denialReason}</div>
                 )}
+              </td>
 
-                {/* Delete */}
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => deleteEntry(e.id)}
+              <td>
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`compliance-${e.id}`} className="text-start">
+                      {(e.complianceChecklist.split(';').map(item => item.trim()).filter(Boolean) || ['None']).map(item => (
+                        <div key={item}>{item}</div>
+                      ))}
+                    </Tooltip>
+                  }
                 >
-                  Delete
-                </Button>
+                  <Badge bg="info" text="dark" style={{ cursor: 'pointer' }}>
+                    {e.aiRecommendation || 'Pending'}
+                  </Badge>
+                </OverlayTrigger>
+                {e.policyAlerts && (
+                  <div className="small text-muted mt-1">Alerts: {e.policyAlerts}</div>
+                )}
+              </td>
+
+              <td>
+                {e.adversarialFlag ? (
+                  <Badge bg="danger">Prompt Attack</Badge>
+                ) : (
+                  <Badge bg="secondary">Clean</Badge>
+                )}
+                {e.adversarialIndicators && (
+                  <div className="small text-muted">{e.adversarialIndicators}</div>
+                )}
+              </td>
+
+              <td>
+                <ButtonGroup size="sm">
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => navigate(`/edit/${e.id}`)}
+                  >
+                    Edit
+                  </Button>
+                  {user?.role === 'admin' && (
+                    <Button
+                      variant={e.status === 'Approved' ? 'secondary' : 'success'}
+                      onClick={() => toggleStatus(e.id)}
+                    >
+                      {e.status === 'Approved' ? 'Unapprove' : 'Approve'}
+                    </Button>
+                  )}
+                  <Button
+                    variant="danger"
+                    onClick={() => deleteEntry(e.id)}
+                  >
+                    Delete
+                  </Button>
+                </ButtonGroup>
+                {e.modelCard && (
+                  <div className="mt-2">
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={() => {
+                        setSelectedCard(e.modelCard ?? null);
+                        setShowCardModal(true);
+                      }}
+                    >
+                      View Model Card
+                    </Button>
+                  </div>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
+
+      <ModelCardModal
+        show={showCardModal}
+        onHide={() => {
+          setShowCardModal(false);
+          setSelectedCard(null);
+        }}
+        card={selectedCard}
+      />
     </Container>
   );
 };
