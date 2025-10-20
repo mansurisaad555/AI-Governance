@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "5056:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RiskAssessment__BaseUrl=http://ml-service:8000
+    depends_on:
+      - ml-service
+    volumes:
+      - backend-data:/app/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
+
+  ml-service:
+    build:
+      context: .
+      dockerfile: ml-service/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - TRANSFORMERS_CACHE=/app/.cache
+    volumes:
+      - transformers-cache:/app/.cache
+
+volumes:
+  backend-data:
+  transformers-cache:
