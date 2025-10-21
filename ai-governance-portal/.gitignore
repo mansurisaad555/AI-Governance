@@ -1,0 +1,55 @@
+# Global
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*.log
+logs/
+
+# Git
+.git/
+.git-credentials
+.gitmodules
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/.vite/
+frontend/.nuxt/
+frontend/.next/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+
+# Python / ML service
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+ml-service/.cache/
+ml-service/.venv/
+ml-service/venv/
+
+# .NET / Backend
+backend/bin/
+backend/obj/
+backend/.vs/
+
+# Docker
+**/.dockerignore.generated
+.docker-compose.override.yml
+
+# OS
+ehthumbs.db
+Desktop.ini
+

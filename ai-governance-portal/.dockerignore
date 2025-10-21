@@ -1,0 +1,58 @@
+# Version control
+.git
+.gitignore
+
+# Node / Frontend
+node_modules
+frontend/node_modules
+frontend/dist
+frontend/build
+frontend/.vite
+
+# Python / ML service
+__pycache__
+*.pyc
+ml-service/.cache
+ml-service/.venv
+ml-service/venv
+
+# .NET / Backend
+backend/bin
+backend/obj
+backend/.vs
+
+# Local env & configs
+.env
+.env.*
+!.env.example
+
+# IDEs / OS
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test artifacts / coverage
+coverage
+**/coverage
+pytest.xml
+junit.xml
+
+# Logs
+*.log
+logs
+**/logs
+
+# Misc
+**/*.bak
+**/*.tmp
+**/~*
+
+# Keep required app sources
+!backend/**
+!frontend/**
+!ml-service/**
+!docker-compose.yml
