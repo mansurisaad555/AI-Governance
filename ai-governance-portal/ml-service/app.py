@@ -4,11 +4,62 @@ from typing import List
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+import os
 from transformers import pipeline
+from typing import Optional
 
-MODEL_ID = "sshleifer/tiny-distilbert-base-uncased-finetuned-sst-2-english"
+try:
+    from huggingface_hub import snapshot_download
+except Exception:
+    snapshot_download = None  # Optional fallback if hub not available
 
-txt_classifier = pipeline("text-classification", model=MODEL_ID)
+MODEL_ID = os.environ.get(
+    "MODEL_ID",
+    "distilbert-base-uncased-finetuned-sst-2-english",
+)
+
+def _load_pipeline(model_id: str):
+    try:
+        return pipeline(
+            "text-classification",
+            model=model_id,
+            framework="pt",
+            device=-1,
+        )
+    except Exception:
+        cache_dir = os.environ.get("HF_HOME") or os.environ.get("TRANSFORMERS_CACHE") or "/app/.cache"
+        if snapshot_download is not None:
+            try:
+                snapshot_download(
+                    repo_id=model_id,
+                    cache_dir=cache_dir,
+                    force_download=True,
+                    local_files_only=False,
+                    resume_download=False,
+                )
+            except Exception:
+                pass
+        # Retry once after forcing a fresh download
+        try:
+            return pipeline(
+                "text-classification",
+                model=model_id,
+                framework="pt",
+                device=-1,
+            )
+        except Exception:
+            fallback_id = "distilbert-base-uncased-finetuned-sst-2-english"
+            if model_id != fallback_id:
+                return pipeline(
+                    "text-classification",
+                    model=fallback_id,
+                    framework="pt",
+                    device=-1,
+                )
+            raise
+
+
+txt_classifier = _load_pipeline(MODEL_ID)
 
 RISK_THRESHOLDS = {
     "low": 0.80,

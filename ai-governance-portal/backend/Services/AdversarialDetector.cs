@@ -17,7 +17,8 @@ public class AdversarialDetector
         "inject"
     ];
 
-    private static readonly Regex SuspiciousPunctuation = new("[#\\\\\\"'{}$]{3,}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex SuspiciousPunctuation =
+            new Regex("[#\\\\\\x22'{}$]{3,}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public AdversarialAnalysis Analyze(string input)
     {

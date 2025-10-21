@@ -3,7 +3,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY frontend/package*.json ./
-RUN npm install --frozen-lockfile || npm install
+RUN npm ci --include=dev || npm install --include=dev
 
 COPY frontend/ ./
 RUN npm run build
